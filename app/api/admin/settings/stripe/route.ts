@@ -51,7 +51,7 @@ async function validateWithStripe(secretKey: string): Promise<{
 }> {
   try {
     const stripe = new Stripe(secretKey, {
-      apiVersion: "2026-01-28.clover",
+      apiVersion: "2026-09-30.endive",
       typescript: true,
     });
     const account = await stripe.accounts.retrieve();
@@ -79,7 +79,7 @@ async function validateWithStripe(secretKey: string): Promise<{
 async function runTestCharge(secretKey: string): Promise<{ ok: boolean }> {
   try {
     const stripe = new Stripe(secretKey, {
-      apiVersion: "2026-01-28.clover",
+      apiVersion: "2026-09-30.endive",
       typescript: true,
     });
     const pi = await stripe.paymentIntents.create({
@@ -102,7 +102,7 @@ async function verifyPublishableKey(
   effectivePublishableKey: string
 ): Promise<boolean> {
   const stripe = new Stripe(effectiveSecretKey, {
-    apiVersion: "2026-01-28.clover",
+    apiVersion: "2026-09-30.endive",
     typescript: true,
   });
   let piId: string | undefined;
