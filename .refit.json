@@ -10,7 +10,7 @@
       "command": [
         "sh",
         "-c",
-        "npm test -- --runTestsByPath \"$@\" || echo 'Refit: the tests failed, the type check still runs.'; echo 'Refit: type check.'; npx --no-install tsc --noEmit --pretty false -p .",
+        "npm run test:ci -- --runTestsByPath \"$@\" || echo 'Refit: the tests failed, the type check still runs.'; echo 'Refit: type check.'; npx --no-install tsc --noEmit --pretty false -p .",
         "refit-check",
         "app/api/admin/settings/stripe/__tests__/route.test.ts",
         "app/api/checkout/__tests__/promo-codes.test.ts",
