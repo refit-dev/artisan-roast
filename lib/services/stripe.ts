@@ -14,7 +14,7 @@ export async function getStripe(): Promise<Stripe | null> {
   const envKey = process.env.STRIPE_SECRET_KEY;
   if (envKey) {
     _stripe = new Stripe(envKey, {
-      apiVersion: "2026-01-28.clover",
+      apiVersion: "2026-09-30.endive",
       typescript: true,
     });
     return _stripe;
@@ -23,7 +23,7 @@ export async function getStripe(): Promise<Stripe | null> {
   const dbCreds = await loadStripeCredentials();
   if (dbCreds?.secretKey) {
     _stripe = new Stripe(dbCreds.secretKey, {
-      apiVersion: "2026-01-28.clover",
+      apiVersion: "2026-09-30.endive",
       typescript: true,
     });
     return _stripe;
