@@ -1,0 +1,28 @@
+# Builds Refit's validation image from the committed package.json and package-lock.json and
+# publishes it, so Refit can run this repository's checks offline with "imageNodeModules".
+name: Refit validation image
+on:
+  workflow_dispatch:
+  push:
+    branches: [refit/customer-image-demo]
+    paths: [package.json, package-lock.json, .refit/validation.Dockerfile]
+permissions:
+  contents: read
+  packages: write
+jobs:
+  image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and push
+        env:
+          IMAGE: ghcr.io/${{ github.repository_owner }}/artisan-roast-validation
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "$TOKEN" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+          docker build -f .refit/validation.Dockerfile \
+            --label org.opencontainers.image.source=https://github.com/${{ github.repository }} \
+            --label org.opencontainers.image.revision=${{ github.sha }} \
+            -t "$IMAGE:${GITHUB_SHA::12}" .
+          docker push "$IMAGE:${GITHUB_SHA::12}"
+          docker image inspect --format '{{index .RepoDigests 0}}' "$IMAGE:${GITHUB_SHA::12}" | tee -a "$GITHUB_STEP_SUMMARY"
