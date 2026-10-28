@@ -1,0 +1,28 @@
+{
+  "formatVersion": 2,
+  "integrations": [
+    {
+      "id": "stripe",
+      "before": "./refit/stripe-2026-01-28.clover.json",
+      "after": "./refit/stripe-2026-09-30.endive.json",
+      "apiVersion": "2026-01-28.clover",
+      "image": "refit-demo/artisan-roast-validation:15be9a6",
+      "command": [
+        "sh",
+        "-c",
+        "npm test -- --runTestsByPath \"$@\" || echo 'Refit: the tests failed, the type check still runs.'; echo 'Refit: type check.'; npx --no-install tsc --noEmit --pretty false -p .",
+        "refit-check",
+        "app/api/admin/settings/stripe/__tests__/route.test.ts",
+        "app/api/checkout/__tests__/promo-codes.test.ts",
+        "app/api/checkout/__tests__/route.test.ts",
+        "app/api/user/subscriptions/[id]/address/__tests__/route.test.ts",
+        "app/api/webhooks/stripe/handlers/__tests__/checkout-user-lookup.test.ts",
+        "lib/payments/stripe/__tests__/adapter-discount.test.ts",
+        "lib/payments/stripe/__tests__/parse-shipping.test.ts",
+        "lib/services/__tests__/stripe.test.ts"
+      ],
+      "compareTypeErrors": true,
+      "imageNodeModules": "/opt/app/node_modules"
+    }
+  ]
+}
