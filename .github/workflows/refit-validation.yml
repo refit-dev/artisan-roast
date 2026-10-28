@@ -1,0 +1,96 @@
+# Added by Refit. It runs only on Refit's refit/** branches, with read-only access, and Refit
+# reads only each job's result and the end of its log. Delete this file to stop it.
+name: Refit validation
+on:
+  push:
+    branches:
+      - refit/**
+permissions:
+  contents: read
+concurrency:
+  group: refit-validation-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  baseline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env: &a1
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      DIRECT_URL: ${{ secrets.DIRECT_URL }}
+      STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY != '' && secrets.STRIPE_SECRET_KEY || 'sk_test_dummy' }}
+      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY != '' && secrets.RESEND_API_KEY || 're_test_dummy' }}
+      RESEND_FROM_EMAIL: ${{ secrets.RESEND_FROM_EMAIL != '' && secrets.RESEND_FROM_EMAIL || 'orders@example.com' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Check out the base commit
+        run: git checkout --detach "$(git merge-base "origin/$DEFAULT_BRANCH" HEAD)"
+        env:
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+      - &a2
+        name: Check for code changes
+        uses: dorny/paths-filter@v3.0.2
+        id: filter
+        with:
+          filters: |
+            code:
+              - '**/*.ts'
+              - '**/*.tsx'
+              - '**/*.js'
+              - '**/*.jsx'
+              - '**/*.json'
+              - '!package.json'
+              - '**/*.css'
+              - '**/*.yml'
+              - '**/*.yaml'
+              - 'prisma/**'
+              - '.github/workflows/**'
+      - &a3
+        name: Skip build (docs only)
+        if: steps.filter.outputs.code == 'false'
+        run: echo "✅ Skipping build - only documentation changes detected"
+      - &a4
+        name: Setup Node
+        if: steps.filter.outputs.code == 'true'
+        uses: actions/setup-node@v6.4.0
+        with:
+          node-version: 24
+          cache: npm
+      - &a5
+        name: Restore Next.js cache
+        if: steps.filter.outputs.code == 'true'
+        id: next-cache
+        uses: actions/cache/restore@v6.1.0
+        with:
+          path: |
+            .next/cache
+            .turbo
+          key: ${{ runner.os }}-next-cache-${{ hashFiles('package-lock.json', 'next.config.ts', 'next.config.js', 'tsconfig.json') }}
+          restore-keys: |
+            ${{ runner.os }}-next-cache-
+      - &a6
+        name: Install dependencies
+        if: steps.filter.outputs.code == 'true'
+        run: npm ci
+      - &a7
+        name: Refit checks
+        run: npm run test:ci
+        env:
+          CI: "true"
+  patched:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env: *a1
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - *a2
+      - *a3
+      - *a4
+      - *a5
+      - *a6
+      - *a7
